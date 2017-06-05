@@ -1,5 +1,7 @@
 package com.lzl.iqiyi_open_api_test.HttpRequest;
 
+import android.graphics.Bitmap;
+
 import okhttp3.*;
 
 import java.util.Iterator;
@@ -8,13 +10,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by SBLZL on 2017/5/31.
+ * Created by LZL on 2017/5/31.
  */
 public class DataRequest {
     //URL
     private static String url = "http://iface.qiyi.com";
     private static String channelListURL = url+"/openapi/realtime/channel";
-
+    private static String recommendURL = url+"/openapi/realtime/recommend";
+    private static String searchURL = url+"/openapi/realtime/search";
     //static
     private static DataRequest dataRequest;
 
@@ -36,6 +39,39 @@ public class DataRequest {
         }
         return dataRequest;
     }
+
+    public void searchVideoNormally(String keyword,Callback callback)
+    {
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("key",keyword);
+        map.put("from","mobile_list");
+        map.put("version","1.0");
+        map.putAll(getPublicParams());
+        requestBuilder = new Request.Builder();
+        requestBuilder.url(searchURL+createParamas(map))
+                .get();
+        Call call = okHttpClient.newCall(requestBuilder.build());
+        call.enqueue(callback);
+    }
+
+    public void getPic(String imgUrl,Callback callback)
+    {
+        requestBuilder = new Request.Builder();
+        requestBuilder.get()
+                .url(imgUrl+"?sign=iqiyi");
+        Call call = okHttpClient.newCall(requestBuilder.build());
+        call.enqueue(callback);
+    }
+
+    public void getRecommendList(Callback callback)
+    {
+        requestBuilder = new Request.Builder();
+        requestBuilder.url(recommendURL+createParamas(getPublicParams()))
+                .get();
+        Call call = okHttpClient.newCall(requestBuilder.build());
+        call.enqueue(callback);
+    }
+
     public void getChannelList(Callback callback)
     {
         Map<String,String> params = new LinkedHashMap<>();

@@ -27,6 +27,29 @@
         android:text="getChannelData"
         android:id="@+id/get_channel_data_button"
         />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RecommendList"
+        android:id="@+id/recommendButton"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GetImage"
+        android:id="@+id/getImageButton"
+        />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/searchButton"
+        android:text="Search"
+        />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/image_data"
+        />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
