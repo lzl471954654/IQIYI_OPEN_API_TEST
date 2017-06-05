@@ -1,4 +1,4 @@
-package com.lzl.iqiyi_open_api_test.HttpRequest;
+package com.lzl.iqiyi_open_api_test.DataClass;
 
 /**
  * Created by LZL on 2017/6/1.

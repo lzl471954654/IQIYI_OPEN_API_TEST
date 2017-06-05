@@ -1,7 +1,5 @@
 package com.lzl.iqiyi_open_api_test.DataClass;
 
-import com.lzl.iqiyi_open_api_test.HttpRequest.ChannelData;
-
 import java.util.List;
 
 /**

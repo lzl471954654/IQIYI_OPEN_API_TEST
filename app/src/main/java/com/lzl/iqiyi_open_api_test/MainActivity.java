@@ -1,8 +1,8 @@
 package com.lzl.iqiyi_open_api_test;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -11,15 +11,15 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.lzl.iqiyi_open_api_test.Activity.PlayerActivity;
 import com.lzl.iqiyi_open_api_test.DataClass.RecommendData;
 import com.lzl.iqiyi_open_api_test.DataClass.VideoData;
-import com.lzl.iqiyi_open_api_test.HttpRequest.ChannelData;
+import com.lzl.iqiyi_open_api_test.DataClass.ChannelData;
 import com.lzl.iqiyi_open_api_test.HttpRequest.DataRequest;
 import com.lzl.iqiyi_open_api_test.HttpRequest.ParseDataFromHttp;
+import com.qiyi.video.playcore.QiyiVideoView;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        QiyiVideoView.init(getApplicationContext());
+        Intent intent = new Intent(this, PlayerActivity.class);
+        startActivity(intent);
         getChannelData = (Button)findViewById(R.id.get_channel_data_button);
         getChannelList = (Button)findViewById(R.id.get_list_button);
         getImageButton = (Button)findViewById(R.id.getImageButton);

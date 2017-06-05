@@ -3,6 +3,7 @@ package com.lzl.iqiyi_open_api_test.HttpRequest;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.lzl.iqiyi_open_api_test.DataClass.ChannelData;
 import com.lzl.iqiyi_open_api_test.DataClass.RecommendData;
 import com.lzl.iqiyi_open_api_test.DataClass.VideoData;
 

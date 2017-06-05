@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        >
+        <com.qiyi.video.playcore.QiyiVideoView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/myPlayer"
+            />
+        <android.support.percent.PercentRelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/myPlayer_bottomBar"
+            >
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_widthPercent = "15%"
+                app:layout_heightPercent = "10%"
+                android:src="@drawable/scrennbuttonfull"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/myPlayer_fullScreenButton"
+                />
+            <android.support.v7.widget.AppCompatSeekBar
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_widthPercent = "85%"
+                app:layout_heightPercent = "10%"
+                android:id="@+id/myPlayer_SeekBar"
+                android:layout_alignParentStart="true"
+                android:layout_alignStart="@id/myPlayer_fullScreenButton"
+                android:thumb="@drawable/seekbar_dragball"
+                />
+
+
+        </android.support.percent.PercentRelativeLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
