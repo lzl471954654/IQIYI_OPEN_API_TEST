@@ -102,7 +102,7 @@ public class DataRequest {
         call.enqueue(callback);
     }
 
-    public void getChannelDetails(Callback callback)
+    private void getChannelDetails(Callback callback)
     {
         Map<String,String> params = new LinkedHashMap<>();
         params.put("type","detail");

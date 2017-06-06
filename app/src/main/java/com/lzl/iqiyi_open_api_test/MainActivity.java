@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        QiyiVideoView.init(getApplicationContext());
         Intent intent = new Intent(this, PlayerActivity.class);
         startActivity(intent);
         getChannelData = (Button)findViewById(R.id.get_channel_data_button);
@@ -136,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         System.out.println("recommendData success!");
-                        final String s = response.body().string();
                         final StringBuilder builder = new StringBuilder();
+                        final String s = response.body().string();
                         List<RecommendData> list = ParseDataFromHttp.getRcommendDataList(s);
                         for (RecommendData recommendData : list) {
                             builder.append(recommendData);
@@ -165,7 +164,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onResponse(Call call, Response response) throws IOException {
                         //System.out.println(response.body().string());
                         String s = response.body().string();
-                       // response.body().close();
                         List<VideoData> list = ParseDataFromHttp.getChannelVideoList(s);
                         final StringBuilder builder = new StringBuilder();
                         for (VideoData videoData : list) {
