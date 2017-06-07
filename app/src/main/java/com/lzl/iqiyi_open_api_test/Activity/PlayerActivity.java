@@ -35,16 +35,22 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     ImageView fullScreenButton;
 
 
+    Bundle bundle = null;
+
     final int UPDATE_PROGRESS = 1;
     final int UPDATE_PROGRESS_TIME = 1000; //1s
+    final int REFRESH_VIDEO_POSITION = 2;
+
+    String playId = "667737400";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play_activity_layout);
-        init();
+        bundle = savedInstanceState;
+        init(savedInstanceState);
     }
 
-    public void init()
+    public void init(Bundle savedInstanceState)
     {
         mplayerBottomBar = (PercentRelativeLayout)findViewById(R.id.myPlayer_bottomBar);
         nowData = (TextView)findViewById(R.id.now_data);
@@ -78,7 +84,28 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             }
         });
-        videoView.setPlayData("667737400");
+        if(savedInstanceState==null)
+            videoView.setPlayData(playId);
+        else
+        {
+            Log.e("savedInstaceState","\tnot null");
+            playId = savedInstanceState.getString("videoId");
+            videoView.setPlayData(playId);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(bundle!=null)
+        {
+            int currentPosition = bundle.getInt("currentDuration");
+            videoView.seekTo(currentPosition);
+            int progressMax = videoView.getDuration();
+            int nowTime = videoView.getCurrentPosition();
+            mSeekBar.setMax(progressMax);
+            mSeekBar.setProgress(nowTime);
+        }
     }
 
     @Override
@@ -124,7 +151,22 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         public void OnPlayerStateChanged(int i) {
-
+            switch (i)
+            {
+                case 16:
+                {
+                    if(bundle!=null)
+                    {
+                        int currentPosition = bundle.getInt("currentDuration");
+                        videoView.seekTo(currentPosition);
+                        int progressMax = videoView.getDuration();
+                        int nowTime = videoView.getCurrentPosition();
+                        mSeekBar.setMax(progressMax);
+                        mSeekBar.setProgress(nowTime);
+                    }
+                    break;
+                }
+            }
         }
     };
 
@@ -213,6 +255,17 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         videoView.release();
         videoView = null;
         mPlayerHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int duration = videoView.getDuration();
+        int currentDuration = videoView.getCurrentPosition();
+        String videoId = playId;
+        outState.putString("videoId",videoId);
+        outState.putInt("duration",duration);
+        outState.putInt("currentDuration",currentDuration);
     }
 
     private String ms2hms(int millis) {
