@@ -1,9 +1,11 @@
 package com.lzl.iqiyi_open_api_test.DataClass;
 
+import java.io.Serializable;
+
 /**
  * Created by LZL on 2017/6/1.
  */
-public class VideoData {
+public class VideoData implements Serializable {
     private String id;
     private String title;
     private String shortTitle;

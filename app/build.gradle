@@ -30,4 +30,5 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.8.0'
     compile 'com.android.support:percent:25.3.1'
     compile files('libs/iQIYISdk.jar')
+    compile 'com.android.support:recyclerview-v7:25.3.1'
 }

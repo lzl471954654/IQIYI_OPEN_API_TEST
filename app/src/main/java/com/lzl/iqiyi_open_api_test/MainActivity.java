@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this, PlayerActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this, PlayerActivity.class);
+        //startActivity(intent);
         getChannelData = (Button)findViewById(R.id.get_channel_data_button);
         getChannelList = (Button)findViewById(R.id.get_list_button);
         getImageButton = (Button)findViewById(R.id.getImageButton);
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onClick( View v) {
+    public void onClick(final View v) {
         switch (v.getId())
         {
             case R.id.searchButton:
@@ -85,6 +85,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     builder.append(videoData);
                                 }
                                 data.setText(builder.toString());
+                                if(list.size()!=0)
+                                {
+                                    VideoData videoData = list.get(0);
+                                    Bundle bundle = new Bundle();
+                                    bundle.putSerializable("videoData",videoData);
+                                    Intent intent = new Intent(MainActivity.this,PlayerActivity.class);
+                                    intent.putExtras(bundle);
+                                    startActivity(intent);
+                                }
                             }
                         });
                     }
