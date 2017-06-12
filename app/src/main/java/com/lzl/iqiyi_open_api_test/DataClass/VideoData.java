@@ -1,5 +1,7 @@
 package com.lzl.iqiyi_open_api_test.DataClass;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 
 /**
@@ -23,6 +25,15 @@ public class VideoData implements Serializable {
     private String totalNum;
     private String upDateNum;
     private String episode;
+    private Bitmap imageBitmap;
+
+    public Bitmap getImageBitmap() {
+        return imageBitmap;
+    }
+
+    public void setImageBitmap(Bitmap imageBitmap) {
+        this.imageBitmap = imageBitmap;
+    }
 
     @Override
     public String toString() {

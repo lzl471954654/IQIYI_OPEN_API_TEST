@@ -15,53 +15,56 @@ import java.util.Set;
 public class DataRequest {
     //URL
     private static String url = "http://iface.qiyi.com";
-    private static String channelListURL = url+"/openapi/realtime/channel";
-    private static String recommendURL = url+"/openapi/realtime/recommend";
-    private static String searchURL = url+"/openapi/realtime/search";
+    private static String channelListURL = url + "/openapi/realtime/channel";
+    private static String recommendURL = url + "/openapi/realtime/recommend";
+    private static String searchURL = url + "/openapi/realtime/search";
     //static
     private static DataRequest dataRequest;
-
 
 
     private OkHttpClient okHttpClient;
     private Request.Builder requestBuilder;
 
-    private DataRequest()
-    {
+    private DataRequest() {
         okHttpClient = new OkHttpClient();
         //requestBuilder = new Request.Builder();
 
     }
+
     public static DataRequest newInstance() {
-        if(dataRequest==null)
-        {
+        if (dataRequest == null) {
             dataRequest = new DataRequest();
         }
         return dataRequest;
     }
 
-    public void searchVideoNormally(String keyword,Callback callback)
-    {
-        Map<String,String> map = new LinkedHashMap<>();
-        map.put("key",keyword);
-        map.put("from","mobile_list");
-        map.put("version","1.0");
+    public void searchVideoNormally(String keyword, Callback callback) {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("key", keyword);
+        map.put("from", "mobile_list");
+        map.put("version", "1.0");
         map.putAll(getPublicParams());
         requestBuilder = new Request.Builder();
-        requestBuilder.url(searchURL+createParamas(map))
+        requestBuilder.url(searchURL + createParamas(map))
                 .get();
         Call call = okHttpClient.newCall(requestBuilder.build());
         call.enqueue(callback);
     }
 
-    public void getPic(String imgUrl,Callback callback)
-    {
+    public void getPic(String imgUrl, Callback callback) {
         requestBuilder = new Request.Builder();
         requestBuilder.get()
-                .url(imgUrl+"?sign=iqiyi");
+                .url(imgUrl + "?sign=iqiyi");
         Call call = okHttpClient.newCall(requestBuilder.build());
         call.enqueue(callback);
     }
+
+    public void getPicHD(String imgUrl, Callback callback)
+    {
+        String newUrl = imgUrl.substring(0, imgUrl.length() - 4) + "_480_360.jpg";
+        getPic(newUrl,callback);
+    }
+
 
     public void getRecommendList(Callback callback)
     {

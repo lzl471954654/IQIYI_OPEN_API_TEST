@@ -44,6 +44,7 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
         TextView itemTitle;
         TextView itemDes;
         TextView itemCount;
+        TextView releaseTime;
         public GuessViewHolder(View view)
         {
             super(view);
@@ -51,32 +52,49 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
             itemTitle = (TextView)view.findViewById(R.id.guess_item_title);
             itemDes = (TextView)view.findViewById(R.id.guess_item_des);
             itemCount = (TextView)view.findViewById(R.id.guess_item_play_count_text);
+            releaseTime = (TextView)view.findViewById(R.id.guess_item_release_time);
         }
     }
 
     @Override
     public void onBindViewHolder(final GuessViewHolder holder, int position) {
-        VideoData videoData = mVideoDataList.get(position);
+        final VideoData videoData = mVideoDataList.get(position);
         holder.itemDes.setText(videoData.getShortTitle());
         holder.itemTitle.setText(videoData.getTitle());
         holder.itemCount.setText(videoData.getPlayCountText());
-        dataRequest.getPic(videoData.getImg(), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
+        String formatData = videoData.getDataFormat();
+        if(formatData.equals("1970-01-01"))
+        {
+            if(videoData.getTotalNum().equals("1"))
+                holder.releaseTime.setVisibility(View.INVISIBLE);
+            else
+                holder.releaseTime.setText("共"+videoData.getTotalNum()+"集");
+        }
+        else
+            holder.releaseTime.setText(videoData.getDataFormat());
+        if(videoData.getImageBitmap()!=null)
+            holder.itemImage.setImageBitmap(videoData.getImageBitmap());
+        else
+        {
+            dataRequest.getPicHD(videoData.getImg(), new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
 
-            }
+                }
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final Bitmap bitmap = ParseDataFromHttp.getPicFromResponse(response);
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        holder.itemImage.setImageBitmap(bitmap);
-                    }
-                });
-            }
-        });
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    final Bitmap bitmap = ParseDataFromHttp.getPicFromResponse(response);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            holder.itemImage.setImageBitmap(bitmap);
+                            videoData.setImageBitmap(bitmap);
+                        }
+                    });
+                }
+            });
+        }
     }
 
     @Override

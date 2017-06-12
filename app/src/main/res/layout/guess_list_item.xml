@@ -15,6 +15,21 @@
         app:layout_heightPercent = "75%"
         android:id="@+id/guess_item_image"
         android:layout_centerVertical="true"
+        android:background="#999999"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_heightPercent = "20%"
+        android:text="2012-02-02"
+        android:background="#55000000"
+        android:textColor="#ffffff"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:padding="3dp"
+        android:layout_alignBottom="@+id/guess_item_image"
+        android:layout_alignEnd="@+id/guess_item_image"
+        android:id="@+id/guess_item_release_time"
         />
     <TextView
         android:layout_width="wrap_content"

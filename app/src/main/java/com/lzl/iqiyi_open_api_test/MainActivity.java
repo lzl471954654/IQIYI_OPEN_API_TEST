@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
+                        System.out.println("image error");
                     }
 
                     @Override
@@ -115,6 +116,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                        // final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                         byte[] bytes = response.body().bytes();
                         final Bitmap bitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                        if(bitmap==null)
+                            System.out.println("image null");
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

@@ -16,6 +16,8 @@ import android.text.BoringLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -60,6 +62,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mPlayerVideoCount;
     private RelativeLayout mPlayerContent;
     private ScrollView scrollView;
+    private ProgressBar progressBar;
+    private LinearLayout progressLayout;
 
     Bundle bundle = null;
     VideoData videoData;
@@ -142,6 +146,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     public void initViewAndSetLisenter()
     {
+        progressLayout = (LinearLayout)findViewById(R.id.myPlayer_progress_layout);
+        progressBar = (ProgressBar)findViewById(R.id.myPlayer_progressBar);
         scrollView = (ScrollView)findViewById(R.id.mplayer_recommendListLayout);
         mPlayerContent = (RelativeLayout)findViewById(R.id.mplayer_content);
         mPlayerVideoTitle = (TextView)findViewById(R.id.video_title);
@@ -171,7 +177,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                videoView.seekTo(mProgress);
             }
 
             @Override
@@ -182,9 +188,17 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
+        //progressBar.setVisibility(View.INVISIBLE);
+        progressLayout.setVisibility(View.INVISIBLE);
         mPlayerVideoCount.setText(videoData.getPlayCountText());
         mPlayerVideoTitle.setText(videoData.getTitle());
-        mPlayerVideoType.setText(videoData.getpType());
+        String type = videoData.getpType();
+        if(type.equals("2"))
+            mPlayerVideoType.setText("电视剧");
+        else if(type.equals("3"))
+            mPlayerVideoType.setText("综艺节目");
+        else
+            mPlayerVideoType.setText("单视频专辑");
     }
 
     @Override
@@ -200,6 +214,10 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             videoView.start();
         }
         mPlayerHandler.sendEmptyMessageDelayed(UPDATE_PROGRESS,UPDATE_PROGRESS_TIME);
+        /*if(videoView.isPlaying())
+            mPlayeButton.setImageResource(R.drawable.pause);
+        else
+            mPlayeButton.setImageResource(R.drawable.play);*/
     }
 
     @Override
@@ -208,6 +226,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         if(videoView!=null)
         {
             videoView.pause();
+            //mPlayeButton.setImageResource(R.drawable.play);
         }
         mPlayerHandler.removeMessages(UPDATE_PROGRESS);
     }
@@ -220,21 +239,34 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     IQYPlayerHandlerCallBack mPlayerCallBack = new IQYPlayerHandlerCallBack() {
         @Override
         public void OnSeekSuccess(long l) {
-
+            Log.e("OnSeekSuccess!!",Long.toString(l));
         }
 
         @Override
         public void OnWaiting(boolean b) {
-
+            Log.e("OnWaiting!!",Boolean.toString(b));
+            final boolean wait = b;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(wait)
+                        progressLayout.setVisibility(View.VISIBLE);
+                        //progressBar.setVisibility(View.VISIBLE);
+                    else
+                        progressLayout.setVisibility(View.INVISIBLE);
+                        //progressBar.setVisibility(View.INVISIBLE);
+                }
+            });
         }
 
         @Override
         public void OnError(ErrorCode errorCode) {
-
+            Log.e("OnError!!",errorCode.name());
         }
 
         @Override
         public void OnPlayerStateChanged(int i) {
+            Log.e("OnPlayerStateChanged!!",Long.toString(i));
             /*final String s = Integer.toString(i)+"\n";
             runOnUiThread(new Runnable() {
                 @Override
