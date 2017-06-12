@@ -8,12 +8,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.BoringLayout;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -35,6 +39,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
+
 /**
  * Created by LZL on 2017/6/5.
  */
@@ -52,6 +58,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mPlayerVideoTitle;
     private TextView mPlayerVideoType;
     private TextView mPlayerVideoCount;
+    private RelativeLayout mPlayerContent;
+    private ScrollView scrollView;
 
     Bundle bundle = null;
     VideoData videoData;
@@ -62,6 +70,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     final int UPDATE_PROGRESS = 1;
     final int UPDATE_PROGRESS_TIME = 1000; //1s
     final int REFRESH_VIDEO_POSITION = 2;
+
+    boolean fullScreenFlag = false;
 
     String playId = "667737400";
     @Override
@@ -89,8 +99,11 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             Log.e("savedInstaceState","\tnot null");
             playId = savedInstanceState.getString("videoId");
             videoView.setPlayData(playId);
+            fullScreenFlag = savedInstanceState.getBoolean("fullScreen",false);
         }
-        loadGuessList();
+        fullScreenSettings();
+        if(!fullScreenFlag)
+            loadGuessList();
     }
     public void loadGuessList()
     {
@@ -129,13 +142,15 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     public void initViewAndSetLisenter()
     {
+        scrollView = (ScrollView)findViewById(R.id.mplayer_recommendListLayout);
+        mPlayerContent = (RelativeLayout)findViewById(R.id.mplayer_content);
         mPlayerVideoTitle = (TextView)findViewById(R.id.video_title);
         mPlayerVideoType = (TextView)findViewById(R.id.video_type_data);
         mPlayerVideoCount = (TextView)findViewById(R.id.play_count_data);
         mGuessList = (RecyclerView)findViewById(R.id.player_guess_list);
         mplayerBottomBar = (PercentRelativeLayout)findViewById(R.id.myPlayer_bottomBar);
         mPlayeButton = (ImageView)findViewById(R.id.myPlayer_play_button);
-        nowData = (TextView)findViewById(R.id.now_data);
+        //nowData = (TextView)findViewById(R.id.now_data);
         fullScreenButton = (ImageView)findViewById(R.id.myPlayer_fullScreenButton);
         mTotalTime = (TextView)findViewById(R.id.totlaTimeText);
         mCurrentTime = (TextView)findViewById(R.id.currentTimeText);
@@ -271,12 +286,39 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     };
 
     public void changeToFullScreen(){
+        fullScreenFlag = !fullScreenFlag;
         if(videoView != null){
             if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE){
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             }else{
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
+        }
+    }
+    public void fullScreenSettings()
+    {
+        ActionBar actionBar = getSupportActionBar();
+        if(!fullScreenFlag)
+        {
+            //fullScreenFlag = false;
+            if(actionBar!=null)
+                actionBar.show();
+        }
+        else
+        {
+            //fullScreenFlag = true;
+            scrollView.setVisibility(View.GONE);
+            if(actionBar!=null)
+                actionBar.hide();
+            //videoView.setVideoViewSize(getResources().getDisplayMetrics().widthPixels,getResources().getDisplayMetrics().heightPixels,true);
+            mPlayerContent.setLayoutParams(new RelativeLayout.LayoutParams(getResources().getDisplayMetrics().widthPixels,getResources().getDisplayMetrics().heightPixels));
+            mPlayerContent.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    |View.SYSTEM_UI_FLAG_FULLSCREEN
+                    //|View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    |View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    |View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            );
         }
     }
 
@@ -356,6 +398,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         outState.putString("videoId",videoId);
         outState.putInt("duration",duration);
         outState.putInt("currentDuration",currentDuration);
+        outState.putBoolean("fullScreen",fullScreenFlag);
     }
 
     private String ms2hms(int millis) {

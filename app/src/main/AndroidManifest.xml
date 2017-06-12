@@ -23,7 +23,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".Activity.PlayerActivity"/>
+        <activity android:name=".Activity.PlayerActivity"
+
+            />
     </application>
 
 </manifest>

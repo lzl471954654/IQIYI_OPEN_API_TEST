@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -7,6 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="200dp"
+        android:id="@+id/mplayer_content"
         >
         <com.qiyi.video.playcore.QiyiVideoView
             android:layout_width="match_parent"
@@ -83,19 +84,13 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:layout_below="@id/myPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/now_data"
-        android:textSize="20sp"
-        android:background="#ccc"
-        android:visibility="gone"
-        />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="15dp"
+        android:layout_below="@id/mplayer_content"
+        android:id="@+id/mplayer_recommendListLayout"
         >
 
         <LinearLayout
@@ -201,4 +196,4 @@
 
     </ScrollView>
 
-</LinearLayout>
+</RelativeLayout>
