@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.app.ActionBar;
@@ -14,7 +15,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.BoringLayout;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -32,6 +37,8 @@ import com.lzl.iqiyi_open_api_test.R;
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
 import com.qiyi.video.playcore.QiyiVideoView;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,10 +67,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mPlayerVideoTitle;
     private TextView mPlayerVideoType;
     private TextView mPlayerVideoCount;
+    private TextView mPlayerProgressText;
+    private TextView mPlayerBrightnessText;
     private RelativeLayout mPlayerContent;
     private ScrollView scrollView;
     private ProgressBar progressBar;
     private LinearLayout progressLayout;
+    private GestureDetector gestureDetector;
 
     Bundle bundle = null;
     VideoData videoData;
@@ -146,6 +156,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     public void initViewAndSetLisenter()
     {
+        mPlayerBrightnessText = (TextView)findViewById(R.id.myPlayer_brightness);
+        mPlayerProgressText = (TextView)findViewById(R.id.myPlayer_progress_text);
         progressLayout = (LinearLayout)findViewById(R.id.myPlayer_progress_layout);
         progressBar = (ProgressBar)findViewById(R.id.myPlayer_progressBar);
         scrollView = (ScrollView)findViewById(R.id.mplayer_recommendListLayout);
@@ -188,6 +200,8 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
+        createGestureDetectorListener();
+        videoView.setOnTouchListener(onTouchListener);
         //progressBar.setVisibility(View.INVISIBLE);
         progressLayout.setVisibility(View.INVISIBLE);
         mPlayerVideoCount.setText(videoData.getPlayCountText());
@@ -267,13 +281,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         public void OnPlayerStateChanged(int i) {
             Log.e("OnPlayerStateChanged!!",Long.toString(i));
-            /*final String s = Integer.toString(i)+"\n";
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    nowData.append(s);
-                }
-            });*/
+
             switch (i)
             {
                 case 16:
@@ -439,4 +447,191 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
         return result;
     }
+
+
+
+    View.OnTouchListener onTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return gestureDetector.onTouchEvent(event);
+        }
+    };
+
+    public void createGestureDetectorListener()
+    {
+        gestureDetector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                Log.e("onDown","onDown....");
+                return false;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+                Log.e("showPress","showPress....");
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                Log.e("onSingleTapUp","onSingleTapUp");
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                String s = "distance x:"+distanceX+"\tdistance y:"+distanceY+"\t"+e1.getX()+"\t"+e2.getX()+"\t"+e1.getY()+"\t"+e2.getY();
+                Log.e("onScroll :\t",s);
+
+
+                float x = e2.getX() - e1.getX();
+                float y = e2.getY() - e1.getY();
+                if(Math.abs(x)>Math.abs(y))
+                {
+                    mPlayerProgressText.setVisibility(View.VISIBLE);
+                    mPlayerHandler.removeCallbacks(progressTextHiddenRun);
+                    if(x>50)
+                    {
+                        int duration = videoView.getDuration();
+                        int currentDuration = videoView.getCurrentPosition();
+                        double percent = (x/500)*0.01;
+                        int moreDuration = (int)(duration*percent);
+                        if(currentDuration+moreDuration>duration)
+                            currentDuration = duration;
+                        else
+                            currentDuration+=moreDuration;
+                        mPlayerProgressText.setText(ms2hms(currentDuration));
+                        mSeekBar.setProgress(currentDuration);
+                        videoView.seekTo(currentDuration);
+                        //Log.e("move Right ",Float.toString(x));
+                    }
+                    else if(x<-50)
+                    {
+                        int duration = videoView.getDuration();
+                        int currentDuration = videoView.getCurrentPosition();
+                        double percent = (Math.abs(x)/500)*0.01;
+                        int lessDuration = (int)(duration*percent);
+                        if(currentDuration-lessDuration<0)
+                            currentDuration = 0;
+                        else
+                            currentDuration-=lessDuration;
+                        mPlayerProgressText.setText(ms2hms(currentDuration));
+                        mSeekBar.setProgress(currentDuration);
+                        videoView.seekTo(currentDuration);
+                    }
+                    mPlayerHandler.postDelayed(progressTextHiddenRun,2000);
+                }
+                else
+                {
+                    mPlayerHandler.removeCallbacks(brightnessTextHiddenRun);
+                    mPlayerBrightnessText.setVisibility(View.VISIBLE);
+                    Log.e("Brightness:","\t"+getAppBrightness());
+                    if(y>50)
+                    {
+                        int brightness = getAppBrightness();
+                        double percent = (y/300)*0.01;
+                        int lessLight = (int)(255*percent);
+                        brightness-=lessLight;
+                        if(brightness>0)
+                            setAppBrightness(brightness);
+                        else
+                        {
+                            brightness = 0;
+                            setAppBrightness(brightness);
+                        }
+                        int progress  = (int)(((brightness)/255.0)*100.0);
+                        mPlayerBrightnessText.setText("亮度："+progress+"%");
+                        Log.e("light","\t"+lessLight);
+                        //Log.e("move Down ",Float.toString(y));
+                    }
+                    else if(y<-50)
+                    {
+                        int brightness = getAppBrightness();
+                        double percent = (Math.abs(y)/300)*0.01;
+                        int moreLight = (int)(255*percent);
+                        brightness+=moreLight;
+                        if(brightness<=255)
+                            setAppBrightness(brightness);
+                        else
+                        {
+                            brightness = 255;
+                            setAppBrightness(brightness);
+                        }
+                        Log.e("light","\t"+moreLight);
+                        int progress  = (int)((brightness/255.0)*100.0);
+                        mPlayerBrightnessText.setText("亮度："+progress+"%");
+                        //Log.e("move Up ",Float.toString(y));
+                    }
+                    mPlayerHandler.postDelayed(brightnessTextHiddenRun,2000);
+                }
+                //mPlayerProgressText.setVisibility(View.INVISIBLE);
+
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                Log.e("LongPress","press....");
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float x = e2.getX() - e1.getX();
+                float y = e2.getY() - e1.getY();
+                if(Math.abs(x)>Math.abs(y))
+                {
+                    if(x>50)
+                    {
+                        Log.e("move Right ",Float.toString(x));
+                    }
+                    else if(x<-50)
+                    {
+                        Log.e("move Left ",Float.toString(x));
+                    }
+                }
+                else
+                {
+                    if(y>50)
+                    {
+                        Log.e("move Down ",Float.toString(y));
+                    }
+                    else if(y<-50)
+                    {
+                        Log.e("move Up ",Float.toString(y));
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    Runnable progressTextHiddenRun = new Runnable() {
+        @Override
+        public void run() {
+            mPlayerProgressText.setVisibility(View.INVISIBLE);
+        }
+    };
+    Runnable brightnessTextHiddenRun = new Runnable() {
+        @Override
+        public void run() {
+            mPlayerBrightnessText.setVisibility(View.INVISIBLE);
+        }
+    };
+
+    private int getAppBrightness()
+    {
+        int brightness = 0;
+        try
+        {
+            brightness = Settings.System.getInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS);
+        }catch (Settings.SettingNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        return brightness;
+    }
+    private void setAppBrightness(int brightness)
+    {
+        Settings.System.putInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS,brightness);
+    }
+
 }
