@@ -142,10 +142,10 @@
     </RelativeLayout>
 
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="5dp"
         android:layout_below="@id/mplayer_content"
         android:id="@+id/mplayer_recommendListLayout"
         >
@@ -160,8 +160,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:paddingBottom="5dp"
-                >
+                android:paddingBottom="5dp">
 
                 <TextView
                     android:id="@+id/video_title"
@@ -176,7 +175,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/video_title"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="7.5dp"
                     android:text="类型："
                     android:textSize="12sp" />
 
@@ -190,36 +189,35 @@
                     android:textSize="12sp" />
 
                 <ImageView
+                    android:id="@+id/play_count_image"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_below="@id/video_type_data"
-                    android:src="@drawable/play_num"
-                    android:layout_marginTop="10dp"
-                    android:id="@+id/play_count_image"
-                    />
+                    android:layout_marginTop="7.5dp"
+                    android:src="@drawable/play_num" />
+
                 <TextView
+                    android:id="@+id/play_count_data"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="33.8万"
-                    android:textSize="10sp"
                     android:layout_alignBottom="@id/play_count_image"
-                    android:layout_toEndOf="@id/play_count_image"
                     android:layout_marginStart="10dp"
-                    android:id="@+id/play_count_data"
-                    />
+                    android:layout_toEndOf="@id/play_count_image"
+                    android:text="33.8万"
+                    android:textSize="10sp" />
+
                 <TextView
+                    android:id="@+id/player_vip_flag"
                     android:layout_width="22dp"
                     android:layout_height="15dp"
-                    android:text="VIP"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="10dp"
-                    android:textSize="12sp"
                     android:background="#63B504"
-                    android:textColor="#ffffff"
                     android:gravity="center"
-                    android:visibility="invisible"
-                    android:id="@+id/player_vip_flag"
-                    />
+                    android:text="VIP"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp"
+                    android:visibility="invisible" />
 
             </RelativeLayout>
 
@@ -234,23 +232,35 @@
                 android:layout_height="wrap_content"
                 android:text="猜你喜欢"
                 android:layout_marginStart="12dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:textColor="#000000"
                 android:textSize="16sp"
                 />
 
-            <android.support.v7.widget.RecyclerView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/player_guess_list"
-                android:layout_marginTop="10dp"
-                android:background="#f0eaea"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
                 >
+                <android.support.v7.widget.RecyclerView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/player_guess_list"
+                    android:background="#f0eaea"
+                    >
+                </android.support.v7.widget.RecyclerView>
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/ProgressBarNewStyle"
+                    android:layout_centerInParent="true"
+                    android:id="@+id/myPlayer_guessList_LoadingBar"
+                    android:visibility="invisible"
+                    />
 
-
-            </android.support.v7.widget.RecyclerView>
+            </RelativeLayout>
         </LinearLayout>
 
-    </ScrollView>
+    </LinearLayout>
 
 </RelativeLayout>

@@ -2,6 +2,7 @@ package com.lzl.iqiyi_open_api_test.OtherClass;
 
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 /**
  * Created by LZL on 2017/6/8.
@@ -21,10 +22,18 @@ public class SpaceItemDecration extends RecyclerView.ItemDecoration {
     }
 
     @Override
-    public void getItemOffsets(Rect outRect, int itemPosition, RecyclerView parent) {
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         outRect.bottom = bottom;
         outRect.top = top;
         outRect.left = left;
         outRect.right = right;
     }
+
+    /*@Override
+    public void getItemOffsets(Rect outRect, int itemPosition, RecyclerView parent) {
+        outRect.bottom = bottom;
+        outRect.top = top;
+        outRect.left = left;
+        outRect.right = right;
+    }*/
 }

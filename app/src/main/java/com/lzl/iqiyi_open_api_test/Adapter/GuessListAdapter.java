@@ -2,6 +2,7 @@ package com.lzl.iqiyi_open_api_test.Adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.lzl.iqiyi_open_api_test.Activity.PlayerActivity;
 import com.lzl.iqiyi_open_api_test.DataClass.VideoData;
 import com.lzl.iqiyi_open_api_test.HttpRequest.DataRequest;
 import com.lzl.iqiyi_open_api_test.HttpRequest.ParseDataFromHttp;
@@ -30,9 +32,9 @@ import okhttp3.Response;
 public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.GuessViewHolder> {
     private List<VideoData> mVideoDataList;
     private DataRequest dataRequest;
-    private Activity activity;
+    private PlayerActivity activity;
 
-    public GuessListAdapter(List<VideoData> list,Activity activity)
+    public GuessListAdapter(List<VideoData> list,PlayerActivity activity)
     {
         this.activity = activity;
         mVideoDataList = list;
@@ -40,6 +42,7 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
     }
     public static class GuessViewHolder extends RecyclerView.ViewHolder
     {
+        View rootView;
         ImageView itemImage;
         TextView itemTitle;
         TextView itemDes;
@@ -53,11 +56,12 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
             itemDes = (TextView)view.findViewById(R.id.guess_item_des);
             itemCount = (TextView)view.findViewById(R.id.guess_item_play_count_text);
             releaseTime = (TextView)view.findViewById(R.id.guess_item_release_time);
+            rootView = view;
         }
     }
 
     @Override
-    public void onBindViewHolder(final GuessViewHolder holder, int position) {
+    public void onBindViewHolder(final GuessViewHolder holder, final int position) {
         final VideoData videoData = mVideoDataList.get(position);
         holder.itemDes.setText(videoData.getShortTitle());
         holder.itemTitle.setText(videoData.getTitle());
@@ -71,7 +75,10 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
                 holder.releaseTime.setText("共"+videoData.getTotalNum()+"集");
         }
         else
+        {
+            holder.releaseTime.setVisibility(View.VISIBLE);
             holder.releaseTime.setText(videoData.getDataFormat());
+        }
         if(videoData.getImageBitmap()!=null)
             holder.itemImage.setImageBitmap(videoData.getImageBitmap());
         else
@@ -95,6 +102,12 @@ public class GuessListAdapter extends RecyclerView.Adapter<GuessListAdapter.Gues
                 }
             });
         }
+        holder.rootView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activity.changeVideo(mVideoDataList.get(position));
+            }
+        });
     }
 
     @Override

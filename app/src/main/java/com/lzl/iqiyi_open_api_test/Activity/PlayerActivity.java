@@ -1,5 +1,6 @@
 package com.lzl.iqiyi_open_api_test.Activity;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -70,10 +71,12 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private TextView mPlayerProgressText;
     private TextView mPlayerBrightnessText;
     private RelativeLayout mPlayerContent;
-    private ScrollView scrollView;
+    private LinearLayout scrollView;
     private ProgressBar progressBar;
+    private ProgressBar listLoadingBar;
     private LinearLayout progressLayout;
     private GestureDetector gestureDetector;
+    private SpaceItemDecration itemDecration = new SpaceItemDecration(5,0,0,0);
 
     Bundle bundle = null;
     VideoData videoData;
@@ -86,8 +89,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     final int REFRESH_VIDEO_POSITION = 2;
 
     boolean fullScreenFlag = false;
+    boolean screenChanged = false;
 
-    String playId = "667737400";
+    String playId = "";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,25 +111,35 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         initViewAndSetLisenter();
         setCallBackOnPlayer();
         if(savedInstanceState==null)
+        {
             videoView.setPlayData(playId);
+        }
         else
         {
             Log.e("savedInstaceState","\tnot null");
             playId = savedInstanceState.getString("videoId");
             videoView.setPlayData(playId);
             fullScreenFlag = savedInstanceState.getBoolean("fullScreen",false);
+            screenChanged = savedInstanceState.getBoolean("screenChanged");
         }
         fullScreenSettings();
         if(!fullScreenFlag)
             loadGuessList();
+        mPlayerHandler.postDelayed(hiddenPlayerBottomBar,2000);
     }
     public void loadGuessList()
     {
+        listLoadingBar.setVisibility(View.VISIBLE);
         String keyWord = videoData.getShortTitle();
         dataRequest.searchVideoNormally(keyWord, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listLoadingBar.setVisibility(View.INVISIBLE);
+                    }
+                });
             }
 
             @Override
@@ -150,17 +164,21 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         GuessListAdapter adapter = new GuessListAdapter(videoDataLIst,this);
         mGuessList.setLayoutManager(new LinearLayoutManager(this));
         mGuessList.setAdapter(adapter);
-        mGuessList.addItemDecoration(new SpaceItemDecration(5,0,0,0));
+        mGuessList.removeItemDecoration(null);
+        mGuessList.removeItemDecoration(itemDecration);
+        mGuessList.addItemDecoration(itemDecration);
+        listLoadingBar.setVisibility(View.INVISIBLE);
     }
 
 
     public void initViewAndSetLisenter()
     {
+        listLoadingBar = (ProgressBar)findViewById(R.id.myPlayer_guessList_LoadingBar);
         mPlayerBrightnessText = (TextView)findViewById(R.id.myPlayer_brightness);
         mPlayerProgressText = (TextView)findViewById(R.id.myPlayer_progress_text);
         progressLayout = (LinearLayout)findViewById(R.id.myPlayer_progress_layout);
         progressBar = (ProgressBar)findViewById(R.id.myPlayer_progressBar);
-        scrollView = (ScrollView)findViewById(R.id.mplayer_recommendListLayout);
+        scrollView = (LinearLayout) findViewById(R.id.mplayer_recommendListLayout);
         mPlayerContent = (RelativeLayout)findViewById(R.id.mplayer_content);
         mPlayerVideoTitle = (TextView)findViewById(R.id.video_title);
         mPlayerVideoType = (TextView)findViewById(R.id.video_type_data);
@@ -286,14 +304,20 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             {
                 case 16:
                 {
-                    if(bundle!=null)
+                    //Log.e("bundle",(bundle==null)+""+bundle.getBoolean("screenChanged"));
+                    if(bundle!=null&&screenChanged)
                     {
+                        Log.e("16","16");
                         int currentPosition = bundle.getInt("currentDuration");
                         videoView.seekTo(currentPosition);
                         int progressMax = videoView.getDuration();
                         int nowTime = videoView.getCurrentPosition();
                         mSeekBar.setMax(progressMax);
                         mSeekBar.setProgress(nowTime);
+                    }
+                    else
+                    {
+                        videoView.seekTo(0);
                     }
                     break;
                 }
@@ -326,6 +350,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     };
 
     public void changeToFullScreen(){
+        screenChanged = true;
         fullScreenFlag = !fullScreenFlag;
         if(videoView != null){
             if(getResources().getConfiguration().orientation != Configuration.ORIENTATION_LANDSCAPE){
@@ -400,16 +425,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
             }
             case R.id.myPlayer:
             {
-                if(mplayerBottomBar.getVisibility()==View.VISIBLE)
-                    mplayerBottomBar.setVisibility(View.INVISIBLE);
-                else
-                    mplayerBottomBar.setVisibility(View.VISIBLE);
+                mplayerBottomBar.setVisibility(View.VISIBLE);
+                mPlayerHandler.postDelayed(hiddenPlayerBottomBar,2000);
 
-                StringBuilder builder = new StringBuilder();
-                builder.append(videoView.isPlaying())
-                        .append('\n')
-                        .append(videoView.getDuration()+"\n")
-                        .append(videoView.getCurrentPosition()+"\n");
                 //nowData.setText(builder.toString());
                 break;
             }
@@ -439,6 +457,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         outState.putInt("duration",duration);
         outState.putInt("currentDuration",currentDuration);
         outState.putBoolean("fullScreen",fullScreenFlag);
+        outState.putBoolean("screenChanged",screenChanged);
     }
 
     private String ms2hms(int millis) {
@@ -482,13 +501,16 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 String s = "distance x:"+distanceX+"\tdistance y:"+distanceY+"\t"+e1.getX()+"\t"+e2.getX()+"\t"+e1.getY()+"\t"+e2.getY();
                 Log.e("onScroll :\t",s);
 
-
                 float x = e2.getX() - e1.getX();
                 float y = e2.getY() - e1.getY();
+                mplayerBottomBar.setVisibility(View.VISIBLE);
+                mPlayerHandler.removeCallbacks(hiddenPlayerBottomBar);
                 if(Math.abs(x)>Math.abs(y))
                 {
+
                     mPlayerProgressText.setVisibility(View.VISIBLE);
                     mPlayerHandler.removeCallbacks(progressTextHiddenRun);
+
                     if(x>50)
                     {
                         int duration = videoView.getDuration();
@@ -519,6 +541,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         videoView.seekTo(currentDuration);
                     }
                     mPlayerHandler.postDelayed(progressTextHiddenRun,2000);
+                    mPlayerHandler.postDelayed(hiddenPlayerBottomBar,2000);
                 }
                 else
                 {
@@ -617,6 +640,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         }
     };
 
+    Runnable hiddenPlayerBottomBar = new Runnable() {
+        @Override
+        public void run() {
+            mplayerBottomBar.setVisibility(View.INVISIBLE);
+        }
+    };
+
     private int getAppBrightness()
     {
         int brightness = 0;
@@ -632,6 +662,27 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
     private void setAppBrightness(int brightness)
     {
         Settings.System.putInt(getContentResolver(),Settings.System.SCREEN_BRIGHTNESS,brightness);
+    }
+
+    public void changeVideo(VideoData videoData)
+    {
+        screenChanged = false;
+        this.videoData = videoData;
+        playId = videoData.getTvId();
+        progressLayout.setVisibility(View.INVISIBLE);
+        mPlayerVideoCount.setText(videoData.getPlayCountText());
+        mPlayerVideoTitle.setText(videoData.getTitle());
+        String type = videoData.getpType();
+        if(type.equals("2"))
+            mPlayerVideoType.setText("电视剧");
+        else if(type.equals("3"))
+            mPlayerVideoType.setText("综艺节目");
+        else
+            mPlayerVideoType.setText("单视频专辑");
+        videoView.setPlayData(playId);
+        videoView.seekTo(0);
+        mGuessList.setAdapter(null);
+        loadGuessList();
     }
 
 }
