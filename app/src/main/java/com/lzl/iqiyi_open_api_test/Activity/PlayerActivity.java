@@ -1,16 +1,22 @@
 package com.lzl.iqiyi_open_api_test.Activity;
 
+import android.Manifest;
 import android.app.ActivityManager;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -90,6 +96,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
 
     boolean fullScreenFlag = false;
     boolean screenChanged = false;
+    boolean hasPermission = false;
 
     String playId = "";
     @Override
@@ -104,6 +111,52 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         else
             playId = videoData.getTvId();
         init(savedInstanceState);
+    }
+
+    private void checkPermissionIsGet()
+    {
+        int result;
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)
+        {
+            result = checkSelfPermission(Manifest.permission.WRITE_SETTINGS);
+            if(result== PackageManager.PERMISSION_DENIED)
+            {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("播放时调整屏幕亮度，需要系统设置权限，为了正常播放请您同意权限请求(没有权限将无法正常播放)。");
+                builder.setPositiveButton("确定申请权限", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            boolean flag = shouldShowRequestPermissionRationale(Manifest.permission.WRITE_SETTINGS);
+                        if(flag)
+                            requestPermissions(new String[]{Manifest.permission.WRITE_SETTINGS},1);
+                    }
+                });
+                builder.setNegativeButton("取消申请", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        hasPermission = false;
+                    }
+                });
+                builder.setCancelable(false);
+                builder.create().show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]==PackageManager.PERMISSION_DENIED)
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("非常抱歉，权限申请失败，亮度调节无法正常使用，如需使用，请在系统权限设置中打开权限。");
+            builder.setPositiveButton("确定",null);
+            builder.create().show();
+        }
+        else
+        {
+            hasPermission = true;
+        }
     }
 
     public void init(Bundle savedInstanceState)
@@ -126,6 +179,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
         if(!fullScreenFlag)
             loadGuessList();
         mPlayerHandler.postDelayed(hiddenPlayerBottomBar,2000);
+        checkPermissionIsGet();
     }
     public void loadGuessList()
     {
@@ -545,10 +599,13 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                 }
                 else
                 {
-                    mPlayerHandler.removeCallbacks(brightnessTextHiddenRun);
-                    mPlayerBrightnessText.setVisibility(View.VISIBLE);
+                    if(hasPermission)
+                    {
+                        mPlayerHandler.removeCallbacks(brightnessTextHiddenRun);
+                        mPlayerBrightnessText.setVisibility(View.VISIBLE);
+                    }
                     Log.e("Brightness:","\t"+getAppBrightness());
-                    if(y>50)
+                    if(y>50&&hasPermission)
                     {
                         int brightness = getAppBrightness();
                         double percent = (y/300)*0.01;
@@ -566,7 +623,7 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         Log.e("light","\t"+lessLight);
                         //Log.e("move Down ",Float.toString(y));
                     }
-                    else if(y<-50)
+                    else if(y<-50&&hasPermission)
                     {
                         int brightness = getAppBrightness();
                         double percent = (Math.abs(y)/300)*0.01;
@@ -584,9 +641,9 @@ public class PlayerActivity extends AppCompatActivity implements View.OnClickLis
                         mPlayerBrightnessText.setText("亮度："+progress+"%");
                         //Log.e("move Up ",Float.toString(y));
                     }
-                    mPlayerHandler.postDelayed(brightnessTextHiddenRun,2000);
+                    if(hasPermission)
+                        mPlayerHandler.postDelayed(brightnessTextHiddenRun,2000);
                 }
-                //mPlayerProgressText.setVisibility(View.INVISIBLE);
 
                 return false;
             }
